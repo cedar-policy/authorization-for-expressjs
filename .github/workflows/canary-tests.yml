@@ -1,0 +1,47 @@
+name: Canary Tests
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Runs weekly on Sunday at midnight UTC
+  workflow_dispatch:      # Allows manual trigger from GitHub UI
+
+env:
+  COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
+  COGNITO_TEST_USERNAME: ${{ secrets.COGNITO_TEST_USERNAME }}
+  COGNITO_TEST_PASSWORD: ${{ secrets.COGNITO_TEST_PASSWORD }}
+  COGNITO_CLIENT_SECRET: ${{ secrets.COGNITO_CLIENT_SECRET }}
+  AWS_REGION: ${{ vars.AWS_REGION }}
+
+jobs:
+  express-compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        express-version: 
+          - '4.x'
+          - 'latest'
+      fail-fast: false
+
+    name: Test Express v${{ matrix.express-version }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - run: npm ci
+
+    - name: Install example app dependencies
+      run: |
+        cd example
+        npm install
+        npm install express@${{ matrix.express-version }}
+        echo "Installed Express version:"
+        npm ls express
+
+    - name: Start Express App
+      run: cd example && npm start &
+
+    - name: Wait for server
+      run: sleep 10
+
+    - name: Run Integration Tests
+      run: npm run test:integration

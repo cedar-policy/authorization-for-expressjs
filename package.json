@@ -1,0 +1,50 @@
+{
+  "name": "@cedar-policy/authorization-for-expressjs",
+  "version": "0.1.0",
+  "description": "Middlewares to authorize expressJS applications with Cedar",
+  "main": "dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integ",
+    "build": "tsup"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cedar-policy/authorization-for-expressjs.git"
+  },
+  "keywords": [
+    "expressjs",
+    "cedar",
+    "authorization"
+  ],
+  "author": "swolebrain",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/cedar-policy/authorization-for-expressjs/issues"
+  },
+  "homepage": "https://github.com/cedar-policy/authorization-for-expressjs#readme",
+  "dependencies": {
+    "@cedar-policy/cedar-authorization": "file://../Cedar-Authorization",
+    "@cedar-policy/cedar-wasm": "^4.4.0",
+    "express": "^5.1.0",
+    "path-to-regexp": "^8.2.0"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.812.0",
+    "@types/express": "^5.0.1",
+    "@types/node-fetch": "^2.6.12",
+    "fast-check": "^4.1.1",
+    "node-fetch": "^3.3.2",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.3"
+  },
+  "bin": "./node_modules/@cedar-policy/cedar-authorization/dist/bin.js"
+}
