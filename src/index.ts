@@ -25,8 +25,8 @@ type PrincipalMapping<TRequest> =
         getPrincipalEntity: (req: TRequest) => Promise<Entity>,
     };
 type ContextMapping<TRequest> =
-  | { type: 'auto' }     // Default: inject full HTTP context  
-  | { type: 'empty' }    // Empty context: {}
+  | { type: 'auto' }
+  | { type: 'empty' }
   | { type: 'custom'; getContext: (req: TRequest) => Record<string, CedarValueJson> };
 
 type ActionProvider<TRequest> = () => EntityUid;
@@ -179,23 +179,7 @@ export class ExpressAuthorizationMiddleware {
                 id: matchedAction.cedarActionName,
             };
             const resource = defaultResourceUid(this.namespace);
-            const context = (() => {
-                switch (this.contextConfiguration.type) {
-                    case 'auto': {
-                        return {
-                            headers: normalizeHeaders(req.headers),
-                            pathParameters: flattenPathParams(req.params),
-                            queryStringParameters: flattenQueryString(req.query || {}),
-                        };
-                    }
-                    case 'empty': {
-                        return {};
-                    }
-                    case 'custom': {
-                        return this.contextConfiguration.getContext(req);
-                    }
-                }
-            })();
+            const context = mapContext(req, this.contextConfiguration);
             const authRequest: AuthorizationRequest = {
                 principal,
                 action,
@@ -267,11 +251,7 @@ export class ExpressAuthorizationMiddleware {
                 principal: principalEntity.uid,
                 action: action,
                 resource: resource ? resource.uid : defaultResourceUid(this.namespace),
-                context: {
-                    headers: normalizeHeaders(req.headers),
-                    pathParameters: flattenPathParams(req.params),
-                    queryStringParameters: flattenQueryString(req.query || {}),
-                },
+                context: mapContext(req, this.contextConfiguration),
             }
             this.config.logger?.debug?.(`Authz Request: ${JSON.stringify(authRequest)}`);
             this.config.logger?.debug?.(`Authz Entities: ${JSON.stringify(entities)}`);
@@ -405,6 +385,24 @@ function defaultResourceUid(namespace: string) {
         type: `${namespace}::Application`,
         id: namespace,
     };
+}
+
+function mapContext(req: Request, contextConfiguration: ContextMapping<Request>) {
+    switch (contextConfiguration.type) {
+        case 'auto': {
+            return {
+                pathParameters: flattenPathParams(req.params),
+                queryStringParameters: flattenQueryString(req.query || {}),
+            };
+        }
+        case 'empty': {
+            return {};
+        }
+        case 'custom': {
+            return contextConfiguration.getContext(req);
+        }
+    }
+
 }
 
 export { CedarInlineAuthorizationEngine } from '@cedar-policy/cedar-authorization';
