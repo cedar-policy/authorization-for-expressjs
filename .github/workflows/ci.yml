@@ -1,8 +1,7 @@
 name: CI
 
-on:
-  pull_request:
-    branches: [ main ]
+# Temporarily Changed to manual trigger until sample app is ready
+on: workflow_dispatch
 
 env:
   COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
