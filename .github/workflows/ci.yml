@@ -3,12 +3,17 @@ name: CI
 # Temporarily Changed to manual trigger until sample app is ready
 on: workflow_dispatch
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
   COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
   COGNITO_TEST_USERNAME: ${{ secrets.COGNITO_TEST_USERNAME }}
   COGNITO_TEST_PASSWORD: ${{ secrets.COGNITO_TEST_PASSWORD }}
   COGNITO_CLIENT_SECRET: ${{ secrets.COGNITO_CLIENT_SECRET }}
   AWS_REGION: ${{ vars.AWS_REGION }}
+  AVP_ACCESS_ROLE: ${{ vars.AVP_ACCESS_ROLE }}
 
 jobs:
   build-and-test:
@@ -41,14 +46,16 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
+    - uses: ./.github/actions/aws-config
+
     - run: npm ci
-    - name: Install example app dependencies
+    - name: Install sample app dependencies
       run: |
-        cd example
+        cd examples/sample-app
         npm install
     - name: Start Express App
       run: |
-        cd example
+        cd examples/sample-app
         PRINCIPAL_TYPE=${{ matrix.principal-type }} AUTHORIZER=${{ matrix.authorizer }} npm start &
     - name: Wait for server
       run: sleep 10
@@ -67,15 +74,17 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
+    - uses: ./.github/actions/aws-config
+
     - run: npm ci
-    - name: Install example app dependencies
+    - name: Install sample app dependencies
       run: |
-        cd example
+        cd examples/sample-app
         npm install
         npm install express@${{ matrix.express-version }}
         npm ls express
     - name: Start Express App
-      run: cd example && npm start &
+      run: cd examples/sample-app && npm start &
     - name: Wait for server
       run: sleep 10
     - name: Run Integration Tests
