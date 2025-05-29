@@ -1,0 +1,21 @@
+name: 'Setup Authorizer Dependencies'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Clone and build dependencies
+      shell: bash
+      run: |
+        cd ..
+        # Clone and build Cedar-Authorization
+        git clone https://${{ env.REPO_ACCESS_TOKEN }}@github.com/cedar-policy/cedar-authorization.git
+        cd cedar-authorization
+        npm install
+        npm run build
+        
+        cd ..
+        # Clone and build authorization-clients-js
+        git clone https://${{ env.REPO_ACCESS_TOKEN }}@github.com/verifiedpermissions/authorization-clients-js.git
+        cd authorization-clients-js
+        npm install
+        npm run build
