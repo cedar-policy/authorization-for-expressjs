@@ -1,7 +1,10 @@
 name: CI
 
 # Temporarily Changed to manual trigger until sample app is ready
-on: workflow_dispatch
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -29,6 +32,7 @@ jobs:
         run: npm run test:unit
 
   integration-tests:
+    if: ${{ false }} # Temporarily skip until sample app is ready
     needs: build-and-test
     runs-on: ubuntu-latest
     strategy:
@@ -65,6 +69,7 @@ jobs:
       run: npm run test:integration
 
   integration-express-versions:
+    if: ${{ false }} # Temporarily skip until sample app is ready
     needs: build-and-test
     runs-on: ubuntu-latest
     strategy:

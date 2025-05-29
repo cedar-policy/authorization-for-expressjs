@@ -19,4 +19,3 @@ runs:
         cd authorization-clients-js
         npm install
         npm run build
-
