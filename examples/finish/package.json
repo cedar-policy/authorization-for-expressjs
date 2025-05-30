@@ -1,0 +1,26 @@
+{
+  "name": "cedar-express-sample",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "express",
+    "api",
+    "pet-store"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "A simple Express.js API for a pet store",
+  "dependencies": {
+    "@cedar-policy/authorization-for-expressjs": "^1.0.0",
+    "body-parser": "^2.2.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "jwks-rsa": "^3.2.0",
+    "uuid": "^11.1.0"
+  }
+}

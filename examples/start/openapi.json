@@ -1,0 +1,210 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Pet Store API",
+    "description": "A simple Express.js API for managing a pet store inventory",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/pets": {
+      "get": {
+        "summary": "Get all pets",
+        "description": "Returns a list of all pets in the store",
+        "operationId": "GET /pets",
+        "responses": {
+          "200": {
+            "description": "A list of pets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Pet"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new pet",
+        "description": "Creates a new pet in the store",
+        "operationId": "POST /pets",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pet created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/pets/{petId}": {
+      "get": {
+        "summary": "Get pet by ID",
+        "description": "Returns details for a specific pet",
+        "operationId": "GET /pets/{petId}",
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the pet to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pet details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pet not found"
+          }
+        }
+      }
+    },
+    "/pets/{petId}/sale": {
+      "post": {
+        "summary": "Mark pet as sold",
+        "description": "Marks a pet as sold",
+        "operationId": "POST /pets/{petId}/sale",
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the pet to mark as sold"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pet marked as sold",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pet not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PetInput": {
+        "type": "object",
+        "required": [
+          "name",
+          "species",
+          "breed",
+          "age"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Whiskers"
+          },
+          "species": {
+            "type": "string",
+            "example": "Cat"
+          },
+          "breed": {
+            "type": "string",
+            "example": "Siamese"
+          },
+          "age": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "example": 2
+          }
+        }
+      },
+      "Pet": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "example": "Buddy"
+          },
+          "species": {
+            "type": "string",
+            "example": "Dog"
+          },
+          "breed": {
+            "type": "string",
+            "example": "Golden Retriever"
+          },
+          "age": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "example": 3
+          },
+          "sold": {
+            "type": "boolean",
+            "default": false,
+            "example": false
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-05-13T17:30:00.000Z"
+          },
+          "soldAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-05-13T17:35:00.000Z"
+          }
+        }
+      }
+    }
+  }
+}
