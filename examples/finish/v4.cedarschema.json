@@ -1,0 +1,104 @@
+{
+  "PetStoreApp": {
+    "entityTypes": {
+      "User": {
+        "shape": {
+          "attributes": {},
+          "type": "Record"
+        },
+        "memberOfTypes": [
+          "UserGroup"
+        ]
+      },
+      "UserGroup": {
+        "shape": {
+          "attributes": {},
+          "type": "Record"
+        }
+      },
+      "Application": {
+        "shape": {
+          "attributes": {},
+          "type": "Record"
+        }
+      }
+    },
+    "actions": {
+      "GET /pets": {
+        "appliesTo": {
+          "context": {
+            "type": "Record",
+            "attributes": {}
+          },
+          "principalTypes": [
+            "User"
+          ],
+          "resourceTypes": [
+            "Application"
+          ]
+        },
+        "annotations": {
+          "httpVerb": "get",
+          "httpPathTemplate": "/pets"
+        }
+      },
+      "POST /pets": {
+        "appliesTo": {
+          "context": {
+            "type": "Record",
+            "attributes": {}
+          },
+          "principalTypes": [
+            "User"
+          ],
+          "resourceTypes": [
+            "Application"
+          ]
+        },
+        "annotations": {
+          "httpVerb": "post",
+          "httpPathTemplate": "/pets"
+        }
+      },
+      "GET /pets/{petId}": {
+        "appliesTo": {
+          "context": {
+            "type": "Record",
+            "attributes": {}
+          },
+          "principalTypes": [
+            "User"
+          ],
+          "resourceTypes": [
+            "Application"
+          ]
+        },
+        "annotations": {
+          "httpVerb": "get",
+          "httpPathTemplate": "/pets/{petId}"
+        }
+      },
+      "POST /pets/{petId}/sale": {
+        "appliesTo": {
+          "context": {
+            "type": "Record",
+            "attributes": {}
+          },
+          "principalTypes": [
+            "User"
+          ],
+          "resourceTypes": [
+            "Application"
+          ]
+        },
+        "annotations": {
+          "httpVerb": "post",
+          "httpPathTemplate": "/pets/{petId}/sale"
+        }
+      }
+    },
+    "annotations": {
+      "mappingType": "SimpleRest"
+    }
+  }
+}
