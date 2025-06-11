@@ -238,8 +238,32 @@ export class ExpressAuthorizationMiddleware {
                 };
             }
             
-            const resource = config.resourceProvider ? await config.resourceProvider(req) : undefined;
-            const entities = config.entitiesProvider ? await config.entitiesProvider(req) : [];
+            let resource: Entity|undefined = undefined;
+            if (typeof config.resourceProvider === 'function') {
+                const resourceResult = await applyResourceFetcherCallback(
+                    () => config.resourceProvider!(req),
+                    res,
+                    this.config.logger?.debug
+                );
+                if (!resourceResult || !resourceResult.attrs) {
+                    res.status(400).send('Invalid request');
+                    return;
+                }
+                resource = resourceResult;
+            }
+            let entities: Entity[] = [];
+            if (config.entitiesProvider) {
+                const entitiesResult = await applyEntitiesFetcherCallback(
+                    () => config.entitiesProvider!(req),
+                    res,
+                    this.config.logger?.debug
+                );
+                if (!entitiesResult) {
+                    res.status(400).send('Invalid request');
+                    return;
+                }
+                entities = entitiesResult;
+            }
             
             if (this.config.principalConfiguration.type === 'custom') {
                 entities.push(principalEntity);
@@ -290,7 +314,34 @@ export class ExpressAuthorizationMiddleware {
     }
 }
 
-
+async function applyResourceFetcherCallback(
+    cb: () => Promise<Entity>,
+    res: Response,
+    debugLogger?: (message: string) => void
+) {
+    try {
+        const result = await cb();
+        return result;
+    } catch (e) {
+        debugLogger?.(`Error during resource fetcher callback: ${e}`);
+        res.status(400).send('Invalid request');
+        return false;
+    }
+}
+async function applyEntitiesFetcherCallback(
+    cb: () => Promise<Entity[]>,
+    res: Response,
+    debugLogger?: (message: string) => void
+) {
+    try {
+        const result = await cb();
+        return result;
+    } catch (e) {
+        debugLogger?.(`Error during resource fetcher callback: ${e}`);
+        res.status(400).send('Invalid request');
+        return false;
+    }
+}
 
 
 export function flattenPathParams(pathParams: Partial<Record<string, string | string[]>>): Record<string, string[]> {
