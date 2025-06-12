@@ -24,6 +24,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Install git-secrets
+        run: |
+          git clone https://github.com/awslabs/git-secrets.git
+          cd git-secrets
+          sudo make install
+
+      - name: Configure git-secrets
+        run: |
+          git secrets --register-aws
+
+      - name: Run full repository scan
+        run: |
+          git secrets --scan-history
+
       - uses: ./.github/actions/authorizer-dep-setup
       - run: npm ci
       - name: Build the library
