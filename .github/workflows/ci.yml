@@ -16,8 +16,9 @@ env:
   COGNITO_TEST_PASSWORD: ${{ secrets.COGNITO_TEST_PASSWORD }}
   COGNITO_CLIENT_SECRET: ${{ secrets.COGNITO_CLIENT_SECRET }}
   AWS_REGION: ${{ vars.AWS_REGION }}
-  AVP_ACCESS_ROLE: ${{ vars.AVP_ACCESS_ROLE }}
   REPO_ACCESS_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
+  ISSUER_URI: ${{ secrets.ISSUER_URI }}
+  JWKS_URI: ${{ secrets.JWKS_URI }}
 
 jobs:
   build-and-test:
@@ -49,44 +50,29 @@ jobs:
         run: npm run test:unit
 
   integration-tests:
-    if: ${{ false }} # Temporarily skip until sample app is ready
     needs: build-and-test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - principal-type: 'custom'
-            authorizer: 'Cedar'
-          - principal-type: 'identityToken'
-            authorizer: 'AVP'
-          - principal-type: 'accessToken'
-            authorizer: 'AVP'
-          - principal-type: 'custom'
-            authorizer: 'AVP'
-      fail-fast: false
-    
-    name: Integration Test (Principal ${{ matrix.principal-type }}, Authorizer ${{ matrix.authorizer }})
+    name: Integration Test
     
     steps:
     - uses: actions/checkout@v3
-    - uses: ./.github/actions/aws-config
     - uses: ./.github/actions/authorizer-dep-setup
     - run: npm ci
+    - run: npm run build
     - name: Install sample app dependencies
       run: |
-        cd examples/sample-app
+        cd examples/finish
         npm install
     - name: Start Express App
       run: |
-        cd examples/sample-app
-        PRINCIPAL_TYPE=${{ matrix.principal-type }} AUTHORIZER=${{ matrix.authorizer }} npm start &
+        cd examples/finish
+        npm start &
     - name: Wait for server
       run: sleep 10
     - name: Run Integration Tests
       run: npm run test:integration
 
   integration-express-versions:
-    if: ${{ false }} # Temporarily skip until sample app is ready
     needs: build-and-test
     runs-on: ubuntu-latest
     strategy:
@@ -98,18 +84,17 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
-    - uses: ./.github/actions/aws-config
     - uses: ./.github/actions/authorizer-dep-setup
-
     - run: npm ci
+    - run: npm run build
     - name: Install sample app dependencies
       run: |
-        cd examples/sample-app
+        cd examples/finish
         npm install
         npm install express@${{ matrix.express-version }}
         npm ls express
     - name: Start Express App
-      run: cd examples/sample-app && npm start &
+      run: cd examples/finish && npm start &
     - name: Wait for server
       run: sleep 10
     - name: Run Integration Tests

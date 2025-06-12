@@ -11,10 +11,9 @@ const BASE_URL = 'http://localhost:3000';
 
 const COGNITO_CLIENT_ID = process.env.COGNITO_CLIENT_ID;
 const TEST_USERNAME = process.env.COGNITO_TEST_USERNAME;
-const TEST_PASSWORD = process.env.TEST_PASSWORD;
+const TEST_PASSWORD = process.env.COGNITO_TEST_PASSWORD;
 const COGNITO_CLIENT_SECRET = process.env.COGNITO_CLIENT_SECRET;
 const AWS_REGION = process.env.AWS_REGION;
-const PRINCIPAL_TYPE = process.env.PRINCIPAL_TYPE;
 
 function calculateSecretHash(username: string): string {
   if (!COGNITO_CLIENT_ID || !COGNITO_CLIENT_SECRET) {
@@ -80,53 +79,28 @@ describe('Express Library integration tests', () => {
     }
   });
 
-  it(`should be authorized to create a new artist with ${PRINCIPAL_TYPE} principal type`, async () => {
-    
-    const newArtist = {
-      name: 'Test Artist',
-      genre: 'Pop',
-      bio: 'This is a test artist bio'
-    };
+  it('should be authorized to get pets', async () => {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authTokens.accessToken}`
+      };
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
+      const response = await fetch(`${BASE_URL}/pets`, {
+        method: 'GET',
+        headers
+      });
 
-    if(PRINCIPAL_TYPE === 'accessToken') {
-      headers['Authorization'] = `Bearer ${authTokens.accessToken}`;
-    } else if (PRINCIPAL_TYPE === 'identityToken'){
-      headers['Authorization'] = `Bearer ${authTokens.idToken}`;
-    }
-
-    const response = await fetch(`${BASE_URL}/artists`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(newArtist)
-    });
-
-    expect(response.status).toBe(201);
+      expect(response.status).toBe(200);
   });
 
-  it(`should fail to create a new artist with invalid ${PRINCIPAL_TYPE} principal type`, async () => {
+  it(`should fail to get pets invalid token`, async () => {
 
-    if(PRINCIPAL_TYPE === 'custom'){
-      console.log('custom principal configured by service');
-      return;
-    }
-
-    const newArtist = {
-      name: 'Test Artist',
-      genre: 'Pop',
-      bio: 'This is a test artist bio'
-    };
-
-    const response = await fetch(`${BASE_URL}/artists`, {
-      method: 'POST',
+    const response = await fetch(`${BASE_URL}/pets`, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer randominvalidtoken'
-      },
-      body: JSON.stringify(newArtist)
+      }
     });
 
     expect(response.status).toBeGreaterThan(300);

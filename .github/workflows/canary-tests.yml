@@ -15,7 +15,8 @@ env:
   COGNITO_TEST_PASSWORD: ${{ secrets.COGNITO_TEST_PASSWORD }}
   COGNITO_CLIENT_SECRET: ${{ secrets.COGNITO_CLIENT_SECRET }}
   AWS_REGION: ${{ vars.AWS_REGION }}
-  AVP_ACCESS_ROLE: ${{ vars.AVP_ACCESS_ROLE }}
+  ISSUER_URI: ${{ secrets.ISSUER_URI }}
+  JWKS_URI: ${{ secrets.JWKS_URI }}
 
 jobs:
   express-compatibility:
@@ -31,22 +32,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: ./.github/actions/aws-config
+    - uses: ./.github/actions/authorizer-dep-setup
     - run: npm ci
-
+    - run: npm run build
     - name: Install sample app dependencies
       run: |
-        cd examples/sample-app
+        cd examples/finish
         npm install
         npm install express@${{ matrix.express-version }}
-        echo "Installed Express version:"
         npm ls express
-
     - name: Start Express App
-      run: cd examples/sample-app && npm start &
-
+      run: cd examples/finish && npm start &
     - name: Wait for server
       run: sleep 10
-
     - name: Run Integration Tests
       run: npm run test:integration

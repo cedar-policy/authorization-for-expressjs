@@ -49,7 +49,9 @@ const expressAuthorization = new ExpressAuthorizationMiddleware({
 async function principalEntityFetcher(req) {
        
   const user = req.user;   // it's common practice for the authn middleware to store the user info from the decoded token here
-  const userGroups = user["groups"].map(userGroupId => ({
+
+  // Set group membership claim key for your oidc identity provider ("cognito:groups" for Cognito)
+  const userGroups = user["cognito:groups"].map(userGroupId => ({
       type: 'PetStoreApp::UserGroup',
       id: userGroupId       
   }));
