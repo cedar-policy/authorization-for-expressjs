@@ -3,7 +3,8 @@ const jwksClient = require('jwks-rsa');
 
 // Initialize the JWKS client
 const client = jwksClient({
-  jwksUri: '<jwks uri for your oidc identity provider>',
+  // Set jwks uri for your oidc identity provider
+  jwksUri: process.env.JWKS_URI,
   cache: true,
   cacheMaxEntries: 5,
   cacheMaxAge: 600000 // 10 minutes
@@ -34,7 +35,8 @@ const verifyToken = (req, res, next) => {
   // Verify the token
   jwt.verify(token, getSigningKey, {
     algorithms: ['RS256'],
-    issuer: `<issuer uri for your oidc identity provider>`
+    // Set issuer uri for your oidc identity provider
+    issuer: process.env.ISSUER_URI
   }, (err, decoded) => {
     if (err) {
       console.error('JWT verification error:', err);

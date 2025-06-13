@@ -12,10 +12,3 @@ runs:
         cd cedar-authorization
         npm install
         npm run build
-        
-        cd ..
-        # Clone and build authorization-clients-js
-        git clone https://${{ env.REPO_ACCESS_TOKEN }}@github.com/verifiedpermissions/authorization-clients-js.git
-        cd authorization-clients-js
-        npm install
-        npm run build
