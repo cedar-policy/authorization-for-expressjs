@@ -16,7 +16,6 @@ env:
   COGNITO_TEST_PASSWORD: ${{ secrets.COGNITO_TEST_PASSWORD }}
   COGNITO_CLIENT_SECRET: ${{ secrets.COGNITO_CLIENT_SECRET }}
   AWS_REGION: ${{ vars.AWS_REGION }}
-  REPO_ACCESS_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
   ISSUER_URI: ${{ secrets.ISSUER_URI }}
   JWKS_URI: ${{ secrets.JWKS_URI }}
 
@@ -42,7 +41,6 @@ jobs:
         run: |
           git secrets --scan-history
 
-      - uses: ./.github/actions/authorizer-dep-setup
       - run: npm ci
       - name: Build the library
         run: npm run build
@@ -56,7 +54,6 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
-    - uses: ./.github/actions/authorizer-dep-setup
     - run: npm ci
     - run: npm run build
     - name: Install sample app dependencies
@@ -84,7 +81,6 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
-    - uses: ./.github/actions/authorizer-dep-setup
     - run: npm ci
     - run: npm run build
     - name: Install sample app dependencies

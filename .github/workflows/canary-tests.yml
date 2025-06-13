@@ -32,7 +32,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: ./.github/actions/authorizer-dep-setup
     - run: npm ci
     - run: npm run build
     - name: Install sample app dependencies

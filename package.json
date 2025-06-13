@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/cedar-policy/authorization-for-expressjs#readme",
   "dependencies": {
-    "@cedar-policy/cedar-authorization": "file://../cedar-authorization",
+    "@cedar-policy/cedar-authorization": "^0.1.0",
     "@cedar-policy/cedar-wasm": "^4.4.0",
     "express": "^5.1.0",
     "path-to-regexp": "^8.2.0"
