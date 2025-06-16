@@ -242,8 +242,7 @@ export class ExpressAuthorizationMiddleware {
             if (typeof config.resourceProvider === 'function') {
                 const resourceResult = await applyResourceFetcherCallback(
                     () => config.resourceProvider!(req),
-                    res,
-                    this.config.logger?.debug
+                    this.config.logger?.debug,
                 );
                 if (!resourceResult || !resourceResult.attrs) {
                     res.status(400).send('Invalid request');
@@ -255,8 +254,7 @@ export class ExpressAuthorizationMiddleware {
             if (config.entitiesProvider) {
                 const entitiesResult = await applyEntitiesFetcherCallback(
                     () => config.entitiesProvider!(req),
-                    res,
-                    this.config.logger?.debug
+                    this.config.logger?.debug,
                 );
                 if (!entitiesResult) {
                     res.status(400).send('Invalid request');
@@ -316,7 +314,6 @@ export class ExpressAuthorizationMiddleware {
 
 async function applyResourceFetcherCallback(
     cb: () => Promise<Entity>,
-    res: Response,
     debugLogger?: (message: string) => void
 ) {
     try {
@@ -324,13 +321,11 @@ async function applyResourceFetcherCallback(
         return result;
     } catch (e) {
         debugLogger?.(`Error during resource fetcher callback: ${e}`);
-        res.status(400).send('Invalid request');
         return false;
     }
 }
 async function applyEntitiesFetcherCallback(
     cb: () => Promise<Entity[]>,
-    res: Response,
     debugLogger?: (message: string) => void
 ) {
     try {
@@ -338,7 +333,6 @@ async function applyEntitiesFetcherCallback(
         return result;
     } catch (e) {
         debugLogger?.(`Error during resource fetcher callback: ${e}`);
-        res.status(400).send('Invalid request');
         return false;
     }
 }
