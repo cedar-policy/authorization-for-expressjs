@@ -20,9 +20,10 @@ npm install @cedar-policy/authorization-for-expressjs
 
 ## Quick Start
 
-1. Create your Cedar schema and policies
-2. Set up the authorization middleware
-3. Define your routes
+To implement this package, do the following:
+1. Create your Cedar schema and policies.
+2. Set up the authorization middleware.
+3. Define your routes.
 
 ```javascript
 const express = require('express');
@@ -102,14 +103,16 @@ The middleware constructor accepts an options object with the following properti
   - `type`: Schema type ('jsonString' for now, 'cedar' coming soon)
   - `schema`: Cedar schema as a string, in the format dictated by `type`
 - `authorizationEngine`: The authorization engine for the application. Current options are:
-       - Cedar - @cedar-policy/authorization-for-expressjs
-       - Amazon Verified Permissions (AVP) - @verifiedpermissions/authorization-clients
+  - Cedar - @cedar-policy/authorization-for-expressjs
+  - Amazon Verified Permissions (AVP) - @verifiedpermissions/authorization-clients
+  - Custom - Define your own authorization engine
 - `skippedEndpoints`: Array of endpoints to skip authorization checks. For example, endpoints that are meant to be open to everyone (eg. `/login` and `/signup`) or endpoints that will be protected with the more granular version of the middleware.
   - `httpVerb`: HTTP method in lowercase
   - `path`: Express route path template
 - `contextConfiguration` (optional): The context object passed in the Cedar-based authorization request.
 - `logger`: Logging configuration
-  - `debug`: Debug log function
+  - `debug`: Debug log function  
+    **Note** - Debug loggers will log unsecure information, such as user tokens, and should never be used in production applications. 
   - `log`: Standard log function
 - `principalConfiguration`: Configuration for mapping authenticated users to Cedar principals. It's a type union like so:
 ```typescript
@@ -120,7 +123,9 @@ The middleware constructor accepts an options object with the following properti
         getPrincipalEntity: (req: Request) => Promise<Entity>,
     };
 ```
-The first two are for identity and access tokens. What they will do is pass a dummy principal to the AuthorizationEngine where the principal is just the token itself. So the first two are really only meant to be used for an `AuthorizationEngine` that does authentication AND authorization, like for example the `AVPAuthorizationEngine` provided by the `verifiedpermissions/authorization-clients-js` package which uses `IsAuthorizedWithToken` under the hood. The `custom` principal configuration meant to be used with any `AuthorizationEngine`, and it presumes you have done authentication first, separately, before the middleware ran.
+The `identityToken` and `access Token` types are for identity and access tokens, respectively. They pass the token itself as the principal and should be used with an `AuthorizationEngine` that does authentication AND authorization. For example, the `AVPAuthorizationEngine` provided by the [verifiedpermissions/authorization-clients-js](https://github.com/verifiedpermissions/authorization-clients-js) package which calls the Amazon Verified Permissions API [IsAuthorizedWithToken](https://docs.aws.amazon.com/verifiedpermissions/latest/apireference/API_IsAuthorizedWithToken.html). 
+
+The `custom` type is meant to be used with any `AuthorizationEngine`, and presumes you have done authentication before running the middleware.
 
 
 ## Complete Example
