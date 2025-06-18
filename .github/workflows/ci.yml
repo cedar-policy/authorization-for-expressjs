@@ -18,6 +18,7 @@ env:
   AWS_REGION: ${{ vars.AWS_REGION }}
   ISSUER_URI: ${{ secrets.ISSUER_URI }}
   JWKS_URI: ${{ secrets.JWKS_URI }}
+  IDP_GROUP_CLAIM_NAME: ${{ vars.IDP_GROUP_CLAIM_NAME }}
 
 jobs:
   build-and-test:
