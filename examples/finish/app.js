@@ -50,8 +50,8 @@ async function principalEntityFetcher(req) {
        
   const user = req.user;   // it's common practice for the authn middleware to store the user info from the decoded token here
 
-  // Set group membership claim key for your oidc identity provider ("cognito:groups" for Cognito)
-  const userGroups = user["cognito:groups"].map(userGroupId => ({
+  // Set group membership claim name for your oidc identity provider
+  const userGroups = user[process.env.IDP_GROUP_CLAIM_NAME || "groups"].map(userGroupId => ({
       type: 'PetStoreApp::UserGroup',
       id: userGroupId       
   }));
