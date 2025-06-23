@@ -132,6 +132,10 @@ The `custom` type is meant to be used with any `AuthorizationEngine`, and presum
 
 Check out the [examples](./examples) directory for a complete implementation of a protected API using this middleware.
 
+## Tools to generate schemas from OpenAPI specs and sample policies
+
+These tools exist a different package, called `@cedar-policy/cedar-authorization` repo. For details on how they work, see that package's [readme](https://github.com/cedar-policy/cedar-authorization).
+
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
