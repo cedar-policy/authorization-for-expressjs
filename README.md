@@ -20,77 +20,154 @@ npm install @cedar-policy/authorization-for-expressjs
 
 ## Quick Start
 
-To implement this package, do the following:
-1. Create your Cedar schema and policies.
-2. Set up the authorization middleware.
-3. Define your routes.
+### Prerequisites
+
+Before you implement the Express integration, ensure you have:
+
+- [Node.js](https://nodejs.org/) and [npm](https://docs.npmjs.com/) installed
+- An [Express.js](https://expressjs.com/) application
+- An OpenID Connect (OIDC) identity provider (optional for testing)
+
+### Setting up the integration
+
+Let's walk through how to secure your application APIs using Cedar with the new package for Express.
+
+#### Step 1: Add the Cedar Authorization Middleware package
+
+The Cedar Authorization Middleware package will be used to generate a Cedar schema, create sample authorization policies, and perform the authorization in your application.
+
+```bash
+npm i --save @cedar-policy/authorization-for-expressjs
+```
+
+#### Step 2: Generate Cedar schema from your APIs
+
+A Cedar [schema](../overview/terminology.html#term-schema) defines the authorization model for an application, including the entity types in the application and the actions users are allowed to take. We recommend defining a [namespace](../overview/terminology.html#term-namespaces) for your schema. In this example, we use YourNamespace. Your policies are validated against this schema when you run the application.
+
+The `authorization-for-expressjs` package can analyze the [OpenAPI specification](https://swagger.io/specification/) of your application and generate a Cedar schema. Specifically, the paths object is required in your specification.
+
+If you don't have an OpenAPI specification,  you can follow the quick instructions of the [express-openapi-generator](https://github.com/nklisch/express-openapi-generator) package to generate an OpenAPI specification.
+
+You can generate a Cedar schema by running, replacing `openapi.json` with the file of your schema and `YourNamespace` with the namespace of our choice:
+
+```bash
+npx @cedar-policy/authorization-for-expressjs generate-schema --api-spec openapi.json --namespace YourNamespace --mapping-type SimpleRest
+```
+
+This will generate a schema file named `v4.cedarschema.json` in the package root.
+
+#### Step 3: Define authorization policies
+
+If no policies are configured, Cedar denies all authorization requests. We will add policies that grant access to APIs only for authorized user groups.
+
+Generate sample Cedar policies:
+
+```bash
+npx @cedar-policy/authorization-for-expressjs generate-policies --schema v4.cedarschema.json
+```
+
+This will generate sample policies in the /policies directory. You can then customize these policies based on your use cases. For example:
+
+```cedar
+// Defines permitted administrator user group actions
+permit (
+    principal in YourNamespace::UserGroup::"<userPoolId>|administrator",
+    action,
+    resource
+);
+
+// Defines permitted employee user group actions
+permit (
+    principal in YourNamespace::UserGroup::"<userPoolId>|employee",
+    action in
+        [YourNamespace::Action::"GET /resources",
+         YourNamespace::Action::"POST /resources",
+         YourNamespace::Action::"GET /resources/{resourceId}",
+         YourNamespace::Action::"PUT /resources/{resourceId}"],
+    resource
+);
+```
+Note: If you specified an `operationId` in the OpenAPI specification, the action names defined in the Cedar Schema will use that `operationId` instead of the default `<HTTP Method> /<PATH>` format. In this case, ensure the naming of your Actions in your Cedar Policies matches the naming of your Actions in your Cedar Schema.
+
+For large applications with complex authorization policies, it can be challenging to analyze and audit the actual permissions provided by the many different policies. Cedar also provides the [Cedar Analysis CLI](https://github.com/cedar-policy/cedar-spec/tree/main/cedar-lean-cli) to help developers perform policy analysis on their policies.
+
+#### Step 4: Update the application code to call Cedar and authorize API access
+
+The application will use the Cedar middleware to authorize every request against the Cedar policies. First, add the package to the project and define the `CedarInlineAuthorizationEngine` and `ExpressAuthorizationMiddleware`. This block of code can be added to the top of the `app.js` file:
 
 ```javascript
-const express = require('express');
 const { ExpressAuthorizationMiddleware, CedarInlineAuthorizationEngine } = require('@cedar-policy/authorization-for-expressjs');
 
-const app = express();
-
-// Load your Cedar policies and schema
 const policies = [
-    fs.readFileSync('policies/policy_1.cedar', 'utf8'),
-    fs.readFileSync('policies/policy_2.cedar', 'utf8')
+    fs.readFileSync(path.join(__dirname, 'policies', 'policy_1.cedar'), 'utf8'),
+    fs.readFileSync(path.join(__dirname, 'policies', 'policy_2.cedar'), 'utf8')
 ];
 
-// Initialize the Cedar authorization engine
 const cedarAuthorizationEngine = new CedarInlineAuthorizationEngine({
     staticPolicies: policies.join('\n'),
     schema: {
         type: 'jsonString',
-        schema: fs.readFileSync('schema.json', 'utf8'),
+        schema: fs.readFileSync(path.join(__dirname, 'v4.cedarschema.json'), 'utf8'),
     }
 });
 
-// Configure the Express authorization middleware
 const expressAuthorization = new ExpressAuthorizationMiddleware({
     schema: {
         type: 'jsonString',
-        schema: fs.readFileSync('schema.json', 'utf8'),
+        schema: fs.readFileSync(path.join(__dirname, 'v4.cedarschema.json'), 'utf8'),
     },
     authorizationEngine: cedarAuthorizationEngine,
     principalConfiguration: {
         type: 'custom',
-        getPrincipalEntity: async (req) => {
-            // Map your authenticated user to a Cedar principal
-            const user = req.user;
-            return {
-                uid: {
-                    type: 'YourApp::User',
-                    id: user.sub
-                },
-                attrs: {
-                    ...user,
-                },
-                parents: user.groups.map(group => ({
-                    type: 'YourApp::UserGroup',
-                    id: group
-                }))
-            };
-        }
+        getPrincipalEntity: principalEntityFetcher
     },
     skippedEndpoints: [
         {httpVerb: 'get', path: '/login'},
-        {httpVerb: 'get', path: '/health'},
+        {httpVerb: 'get', path: '/api-spec/v3'},
     ],
     logger: {
-        debug: console.log,
-        log: console.log,
+        debug: s => console.log(s),
+        log: s => console.log(s),
     }
 });
+```
 
-// Use the middleware after your authentication middleware
-app.use(authMiddleware);  // Your authentication middleware
+Next, add the Express Authorization middleware to the application:
+
+```javascript
+const app = express();
+
+app.use(express.json());
+app.use(verifyToken());   // validate user token
+// ... other pre-authz middlewares
+
 app.use(expressAuthorization.middleware);
 
-// Define your routes
-app.get('/protected-resource', (req, res) => {
-    res.json({ message: 'Access granted!' });
-});
+// ... other middlewares
+```
+
+#### Step 5: Add application code to configure the user
+
+The Cedar authorizer requires user groups and attributes to authorize requests. The authorization middleware relies on the function passed to `getPrincipalEntity` in the initial configuration to generate the principal entity. You need to implement this function to generate the user entity:
+
+```javascript
+async function principalEntityFetcher(req) {
+    const user = req.user;   // it's common practice for the authn middleware to store the user info from the decoded token here
+    const userGroups = user["groups"].map(userGroupId => ({
+        type: 'PetStoreApp::UserGroup',
+        id: userGroupId       
+    }));
+    return {
+        uid: {
+            type: 'PetStoreApp::User',
+            id: user.sub
+        },
+        attrs: {
+            ...user,
+        },
+        parents: userGroups 
+    };
+}
 ```
 
 ## Configuration Options
