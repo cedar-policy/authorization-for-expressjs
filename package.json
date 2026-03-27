@@ -1,6 +1,6 @@
 {
   "name": "@cedar-policy/authorization-for-expressjs",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Middlewares to authorize expressJS applications with Cedar",
   "main": "dist/index.js",
   "module": "./dist/index.mjs",
@@ -30,8 +30,8 @@
   },
   "homepage": "https://github.com/cedar-policy/authorization-for-expressjs#readme",
   "dependencies": {
-    "@cedar-policy/cedar-authorization": "^0.1.0",
-    "@cedar-policy/cedar-wasm": "^4.4.0",
+    "@cedar-policy/cedar-authorization": "^0.2.0",
+    "@cedar-policy/cedar-wasm": "^4.9.1",
     "express": "^5.1.0",
     "path-to-regexp": "^8.2.0"
   },
