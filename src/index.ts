@@ -121,7 +121,7 @@ export class ExpressAuthorizationMiddleware {
     }
     protected getMatchedAction = (req: Request): {status: number, error: string} | SimpleRestAuthMapping => {
         const apiMethod = req.method.toLowerCase() as ApiHttpMethod;
-        const currentUrl = req.originalUrl;
+        const currentUrl = req.path;
 
         const actionMatchersForThisVerb = this.expressSpecificMapper[apiMethod];
         
@@ -155,7 +155,7 @@ export class ExpressAuthorizationMiddleware {
     }
     middleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         const httpVerb = req.method.toLowerCase();
-        const currentUrl = req.originalUrl;
+        const currentUrl = req.path;
         
         if (shouldBeSkipped(this.config.skippedEndpoints || [], httpVerb, currentUrl)) {
             next();
