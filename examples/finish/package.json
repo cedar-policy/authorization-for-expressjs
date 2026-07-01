@@ -16,7 +16,7 @@
   "license": "ISC",
   "description": "A simple Express.js API for a pet store",
   "dependencies": {
-    "@cedar-policy/authorization-for-expressjs": "^0.2.0",
+    "@cedar-policy/authorization-for-expressjs": "^0.3.0",
     "@cedar-policy/cedar-authorization": "^0.2.0",
     "body-parser": "^2.2.2",
     "express": "^5.2.1",
